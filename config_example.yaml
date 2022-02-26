@@ -1,0 +1,10 @@
+display:
+  vcom: -2.61
+  delay: 60
+flickr:
+  user_id: id
+  api_key: apikey
+  api_secret: secret
+photos:
+  - resources/photo1.jpg
+  - resources/photo2.jpg
