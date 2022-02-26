@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Screeny project, 2022
-import time
-
-from IT8951.display import AutoEPDDisplay
-from IT8951 import constants
 import logging
-import yaml
+import time
 from os import path
-from PIL import Image
+
+import yaml
+from IT8951.display import AutoEPDDisplay
 
 from modules.flickr import ModuleFlickr
 from modules.photo import ModulePhoto
-from render import TickerXlHtmlRender
+from render import display_image_8bpp
 from screenymodule import ScreenyModule
 
 
@@ -25,38 +23,30 @@ def load_config(config_file: str) -> any:
     return config
 
 
-def display_image_8bpp(display: AutoEPDDisplay, img_file: str):
-    logging.debug('Displaying picture {}'.format(img_file))
-    dims = (display.width, display.height)
-    img = Image.open(img_file)
-    img.thumbnail(dims)
-    paste_coords = [dims[i] - img.size[i] for i in (0, 1)]
-    img = img.rotate(180, expand=True)
-    display.frame_buf.paste(img, paste_coords)
-    display.draw_full(constants.DisplayModes.GC16)
-
-
 def main():
     logging.basicConfig(level=logging.DEBUG)
     config = load_config(config_file=path.join(path.dirname(__file__), 'config.yaml'))
 
     display = AutoEPDDisplay(vcom=config['display']['vcom'], spi_hz=24000000)
-    html_render = TickerXlHtmlRender()
-    # html_render.get_screenshot('page.html', 'page.png')
+    # get_screenshot_for_page('page.html', 'page.png')
 
     modules: list[ScreenyModule] = []
 
     if config['photos']:
-        modules.append(ModulePhoto(config['photos']))
+        modules.append(ModulePhoto(photo_files=config['photos']))
+
+    if config['flickr']:
+        modules.append(ModuleFlickr(api_key=config['flickr']['api_key'], api_secret=config['flickr']['api_secret'],
+                                    user_id=config['flickr']['user_id']))
 
     while True:
         for i in range(0, len(modules)):
             module = modules[i]
             module.update_data()
             picture = module.get_picture()
-            display_image_8bpp(display, picture)
-            time.sleep(config['display']['delay'])
-
+            if picture:
+                display_image_8bpp(display, picture)
+                time.sleep(config['display']['delay'])
 
     # picture = module_photo.get_picture()
     # display_image_8bpp(display, picture)

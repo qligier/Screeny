@@ -3,27 +3,40 @@
 # Screeny project, 2022
 import logging
 from time import sleep
+
+from IT8951 import constants
+from IT8951.display import AutoEPDDisplay
+from PIL import Image, ImageFilter
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
+from constants import Constants
 
-class TickerXlHtmlRender:
 
-    def __init__(self):
-        self.windowWidth = 1448
-        self.windowHeight = 1072
+def get_screenshot_from_page(html_file: str, dest_screenshot_file: str):
+    opts = Options()
+    opts.add_argument("--headless")
+    opts.add_argument("--hide-scrollbars")
+    opts.add_argument('--force-device-scale-factor=1')
 
-    def get_screenshot(self, html_file: str, dest_screenshot_file: str):
-        opts = Options()
-        opts.add_argument("--headless")
-        opts.add_argument("--hide-scrollbars")
-        opts.add_argument('--force-device-scale-factor=1')
+    driver = webdriver.Chrome(options=opts)
+    driver.set_window_rect(width=Constants.SCREEN_WIDTH, height=Constants.SCREEN_HEIGHT)
+    driver.get(html_file)
+    sleep(1)
+    driver.get_screenshot_as_file(dest_screenshot_file)
+    driver.quit()
 
-        driver = webdriver.Chrome(options=opts)
-        driver.set_window_rect(width=self.windowWidth, height=self.windowHeight)
-        driver.get(html_file)
-        sleep(1)
-        driver.get_screenshot_as_file(dest_screenshot_file)
-        driver.quit()
+    logging.debug('Screenshot captured and saved to {}'.format(dest_screenshot_file))
 
-        logging.debug('Screenshot captured and saved to {}'.format(dest_screenshot_file))
+
+def display_image_8bpp(display: AutoEPDDisplay, img_file: str):
+    logging.debug('Displaying picture {}'.format(img_file))
+    dims = (Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT)
+    img = Image.open(img_file)
+    if dims[0] > Constants.SCREEN_WIDTH or dims[1] > Constants.SCREEN_HEIGHT:
+        img.thumbnail(dims, resample=Image.LANCZOS)
+    paste_coords = [dims[i] - img.size[i] for i in (0, 1)]
+    img = img.filter(ImageFilter.DETAIL)
+    img = img.rotate(180, expand=True)
+    display.frame_buf.paste(img, paste_coords)
+    display.draw_full(constants.DisplayModes.GC16)

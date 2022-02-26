@@ -9,9 +9,9 @@ class ModuleCalendar(ScreenyModule):
 
     def __init__(self, config: any):
         pass
-    
+
     def update_data(self):
         pass
-    
-    def get_picture(self) -> str:
+
+    def get_picture(self) -> str | None:
         pass

@@ -11,5 +11,5 @@ class ScreenyModule(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def get_picture(self) -> str:
+    def get_picture(self) -> str | None:
         pass

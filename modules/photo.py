@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # Screeny project, 2022
 import logging
+
 from screenymodule import ScreenyModule
 
 
@@ -13,10 +14,12 @@ class ModulePhoto(ScreenyModule):
         self.index = len(self.photoFiles) - 1
 
     def update_data(self):
-        self.index = self.index + 1
+        self.index += 1
         if self.index >= len(self.photoFiles):
             self.index = 0
 
-    def get_picture(self) -> str:
+    def get_picture(self) -> str | None:
+        if not self.photoFiles:
+            return None
         logging.debug('Getting picture {}'.format(self.index))
         return self.photoFiles[self.index]
