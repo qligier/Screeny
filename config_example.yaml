@@ -8,3 +8,7 @@ flickr:
 photos:
   - resources/photo1.jpg
   - resources/photo2.jpg
+airthings:
+  api_id: id
+  api_secret: secret
+  device_id: id
