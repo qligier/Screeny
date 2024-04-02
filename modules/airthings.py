@@ -2,10 +2,14 @@
 # -*- coding: utf-8 -*-
 # Screeny project, 2024
 import logging
+import os
+import tempfile
+from typing import TextIO
 
 import requests
 from requests import HTTPError
 
+import render
 from screenymodule import ScreenyModule
 
 
@@ -29,6 +33,8 @@ class ModuleAirthings(ScreenyModule):
     pm1_level = -1
     pm2_5_level = -1
     voc_level = -1
+    humidity = -1
+    temperature = -1.0
 
     def __init__(self, api_id: str, api_secret: str, device_id: str):
         self.api_id = api_id
@@ -42,6 +48,8 @@ class ModuleAirthings(ScreenyModule):
         self.pm1_level = -1
         self.pm2_5_level = -1
         self.voc_level = -1
+        self.humidity = -1
+        self.temperature = -1.0
 
         # Access Token
         try:
@@ -70,14 +78,33 @@ class ModuleAirthings(ScreenyModule):
         self.pm1_level = data['pm1']
         self.pm2_5_level = data['pm25']
         self.voc_level = data['voc']
-        # Update time: data['time']
-        # Humidity: data['humidity']
+        self.humidity = data['humidity']
         # Pressure: data['pressure']
-        # Temperature: data['temp']
+        self.temperature = data['temp']
+        # Update time: data['time']
 
     def get_picture(self) -> str | None:
-        return ''
+        html_file, html_path = tempfile.mkstemp(suffix=".html", text=True)
+        png_file, png_path = tempfile.mkstemp(suffix=".png", text=False)
+        with os.open(html_file) as tmp:
+            self.create_html_page(tmp)
+            render.get_screenshot_from_page(html_path, png_path)
+        return png_path
 
-    def create_html_page(self, output) -> None:
-        with open("views/template_airthings.html") as fp:
+    def create_html_page(self, output: TextIO) -> None:
+        split_num = str(self.temperature).split('.')
+        temp_int = split_num[0]
+        temp_dec = split_num[1]
+        with open("views/template_airthings.html") as template_file:
+            html = (template_file.read()
+                    .replace('{$CO2}', str(self.co2_level))
+                    .replace('{$VOC}', str(self.voc_level))
+                    .replace('{$PM1}', str(self.pm1_level))
+                    .replace('{$PM25}', str(self.pm2_5_level))
+                    .replace('{$RADON}', str(self.radon_level))
+                    .replace('{$HUM}', str(self.humidity))
+                    .replace('{$TEMP_INT}', temp_int)
+                    .replace('{$TEMP_DEC}', temp_dec)
+                    )
+            output.write(html)
             return
