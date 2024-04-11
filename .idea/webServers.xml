@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="ae26219b-ad18-4fcd-80af-a211fcc05d64" name="tickerxl.local">
+        <fileTransfer rootFolder="/home/quentin" accessType="SFTP" host="tickerxl.local" port="22" sshConfigId="0d32f3bf-bebd-449e-8fd6-7c3a3eea172b" sshConfig="quentin@tickerxl.local:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

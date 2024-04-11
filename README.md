@@ -6,8 +6,9 @@ levels of gray, driven by the [IT8951](https://www.ite.com.tw/en/product/view?mi
 
 It's inspired by and partially forks the following projects.
 
-1. [veebch/stonks](https://github.com/veebch/stonks) (GPL-3.0) for the code to properly manage the IT8951 controller and
-   the button.
+1. [veebch/stonks](https://web.archive.org/web/20230126164631/https://github.com/veebch/stonks) (GPL-3.0) for the code
+   to properly manage the IT8951 controller and the button. It seems to have moved to
+   [veebch/btcticker](https://github.com/veebch/btcticker).
 2. [speedyg0nz/MagInkCal](https://github.com/speedyg0nz/MagInkCal) (Apache-2.0) for the idea and code to create HTML
    pages, render them in a headless browser and create a screenshot that is finally displayed on the e-paper screen.
 
@@ -19,3 +20,66 @@ Some resources:
   Google Calendar.
 * [Simple e-ink dashboard](https://core-electronics.com.au/projects/simple-e-ink-dashboard).
 * [txoof/epd_display](https://github.com/txoof/epd_display). E Paper Display Loop
+
+## How to set up
+
+Install [Raspberry Pi OS](https://www.raspberrypi.com/software/) on the microsd card (32-bit seems recommended).
+Pre-configure it to connect to the WiFi network and allow SSH connections.
+
+Once it is running:
+
+```bash
+# Update the OS
+sudo apt-get update
+sudo apt-get upgrade
+
+sudo apt-get install -y build-essential tk-dev libncurses5-dev libncursesw5-dev libreadline6-dev libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev libffi-dev
+wget https://www.python.org/ftp/python/3.10.14/Python-3.10.14.tgz
+tar zxf Python-3.10.14.tgz
+cd Python-3.10.14
+sudo ./configure --enable-optimizations
+sudo make -j 4
+sudo make altinstall
+cd ..
+
+sudo raspi-config nonint do_spi 0
+git clone https://github.com/GregDMeyer/IT8951.git
+cd IT8951
+pip install ./[rpi]
+cd ..
+
+git clone https://github.com/qligier/Screeny
+cd ~/screeny
+python3 -m pip install -r requirements.txt
+cp config_example.yaml config.yaml
+
+python3 main.py
+```
+
+Add autostart:
+
+```bash
+cat <<EOF | sudo tee /etc/systemd/system/screeny.service
+[Unit]
+Description=screeny
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 -u /home/quentin/screeny/main.py
+WorkingDirectory=/home/quentin/screeny/
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=quentin
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+
+Start the service
+
+```bash
+sudo systemctl enable screeny.service
+sudo systemctl start screeny.service
+```

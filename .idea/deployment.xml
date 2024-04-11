@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" remoteFilesAllowedToDisappearOnAutoupload="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="tickerxl.local" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
+    <option name="confirmBeforeUploading" value="false" />
     <serverData>
-      <paths name="pi@tickerxl.local:22">
+      <paths name="tickerxl.local">
         <serverdata>
           <mappings>
-            <mapping deploy="/tmp/pycharm_project_383" local="$PROJECT_DIR$" />
+            <mapping deploy="screeny" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
