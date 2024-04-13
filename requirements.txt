@@ -4,3 +4,4 @@ flickrapi==2.4.0
 Pillow==10.2.0
 selenium==4.19.0
 requests==2.31.0
+rpi-lgpio==0.5 # This is a replacement of python3-rpi.gpio for the Raspberry Pi 5

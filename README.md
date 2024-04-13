@@ -23,7 +23,7 @@ Some resources:
 
 ## How to set up
 
-Install [Raspberry Pi OS](https://www.raspberrypi.com/software/) on the microsd card (32-bit seems recommended).
+Install [Raspberry Pi OS](https://www.raspberrypi.com/software/) on the microsd card.
 Pre-configure it to connect to the WiFi network and allow SSH connections.
 
 Once it is running:
@@ -32,28 +32,24 @@ Once it is running:
 # Update the OS
 sudo apt-get update
 sudo apt-get upgrade
+sudo apt install git python3-pip chromium-chromedriver
+sudo apt remove python3-rpi.gpio
 
-sudo apt-get install -y build-essential tk-dev libncurses5-dev libncursesw5-dev libreadline6-dev libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev libffi-dev
-wget https://www.python.org/ftp/python/3.10.14/Python-3.10.14.tgz
-tar zxf Python-3.10.14.tgz
-cd Python-3.10.14
-sudo ./configure --enable-optimizations
-sudo make -j 4
-sudo make altinstall
-cd ..
-
+# Install the screen library
 sudo raspi-config nonint do_spi 0
 git clone https://github.com/GregDMeyer/IT8951.git
 cd IT8951
-pip install ./[rpi]
+sudo pip3.10 install ./[rpi] --break-system-packages
 cd ..
 
+# Clone and install dependencies
 git clone https://github.com/qligier/Screeny
 cd ~/screeny
-python3 -m pip install -r requirements.txt
+pip install -r requirements.txt --break-system-packages
 cp config_example.yaml config.yaml
 
-python3 main.py
+# We can now run Screeny!
+python main.py
 ```
 
 Add autostart:
@@ -65,7 +61,7 @@ Description=screeny
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/python3 -u /home/quentin/screeny/main.py
+ExecStart=/usr/bin/python -u /home/quentin/screeny/main.py
 WorkingDirectory=/home/quentin/screeny/
 StandardOutput=inherit
 StandardError=inherit

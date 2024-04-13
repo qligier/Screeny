@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 # Screeny project, 2024
 import logging
-import os
-import tempfile
+from os.path import abspath
 from typing import TextIO
 
 import requests
@@ -20,6 +19,9 @@ def make_photo_url(photo: any):
 
 class ModuleAirthings(ScreenyModule):
     """The Airthings measure display module"""
+
+    CACHE_HTML_FILE = '.cache/airthings.html'
+    CACHE_PNG_FILE = '.cache/airthings.png'
 
     authorisation_url = "https://accounts-api.airthings.com/v1/token"
 
@@ -63,7 +65,7 @@ class ModuleAirthings(ScreenyModule):
             logging.error(e)
             return
         token = token_response.json()["access_token"]
-
+        
         # Get the latest data for the device
         try:
             response = requests.get(url=self.device_url, headers={"Authorization": f"Bearer {token}"})
@@ -71,7 +73,7 @@ class ModuleAirthings(ScreenyModule):
             logging.error(e)
             return
 
-        data = response.json()['date']
+        data = response.json()['data']
         # print(response.text)
         self.co2_level = data['co2']
         self.radon_level = data['radonShortTermAvg']
@@ -84,9 +86,9 @@ class ModuleAirthings(ScreenyModule):
         # Update time: data['time']
 
     def get_picture(self) -> str | None:
-        html_file, html_path = tempfile.mkstemp(suffix=".html", text=True)
-        png_file, png_path = tempfile.mkstemp(suffix=".png", text=False)
-        with os.open(html_file) as tmp:
+        html_path = abspath(self.CACHE_HTML_FILE)
+        png_path = abspath(self.CACHE_PNG_FILE)
+        with open(self.CACHE_HTML_FILE, 'wt') as tmp:
             self.create_html_page(tmp)
             render.get_screenshot_from_page(html_path, png_path)
         return png_path
@@ -95,7 +97,7 @@ class ModuleAirthings(ScreenyModule):
         split_num = str(self.temperature).split('.')
         temp_int = split_num[0]
         temp_dec = split_num[1]
-        with open("views/template_airthings.html") as template_file:
+        with open("views/template_airthings.html", 'rt') as template_file:
             html = (template_file.read()
                     .replace('{$CO2}', str(self.co2_level))
                     .replace('{$VOC}', str(self.voc_level))

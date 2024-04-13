@@ -2,17 +2,18 @@
 # -*- coding: utf-8 -*-
 # Screeny project, 2024
 import logging
+import time
 from os import path
+from pathlib import Path
 
 import yaml
+from IT8951.display import AutoEPDDisplay
 
 from modules.airthings import ModuleAirthings
 from modules.flickr import ModuleFlickr
 from modules.photo import ModulePhoto
+from render import display_image_8bpp
 from screenymodule import ScreenyModule
-
-
-# from IT8951.display import AutoEPDDisplay
 
 
 def load_config(config_file: str) -> any:
@@ -28,8 +29,7 @@ def main():
     logging.basicConfig(level=logging.DEBUG)
     config = load_config(config_file=path.join(path.dirname(__file__), 'config.yaml'))
 
-    # display = AutoEPDDisplay(vcom=config['display']['vcom'], spi_hz=24000000)
-    # get_screenshot_for_page('page.html', 'page.png')
+    display = AutoEPDDisplay(vcom=config['display']['vcom'], spi_hz=24000000)
 
     modules: list[ScreenyModule] = []
 
@@ -45,19 +45,21 @@ def main():
             ModuleAirthings(api_id=config['airthings']['api_id'], api_secret=config['airthings']['api_secret'],
                             device_id=config['airthings']['device_id']))
 
-    # while True:
-    #     for i in range(0, len(modules)):
-    #         module = modules[i]
-    #         module.update_data()
-    #         picture = module.get_picture()
-    #         if picture:
-    #             display_image_8bpp(display, picture)
-    #             time.sleep(config['display']['delay'])
+    Path('.cache/').mkdir(parents=True, exist_ok=True)
 
-    airthings = ModuleAirthings(api_id=config['airthings']['api_id'], api_secret=config['airthings']['api_secret'],
-                                device_id=config['airthings']['device_id'])
-    airthings.update_data()
-    airthings.get_picture()
+    while True:
+        for i in range(0, len(modules)):
+            module = modules[i]
+            module.update_data()
+            picture = module.get_picture()
+            if picture:
+                display_image_8bpp(display, picture)
+                time.sleep(config['display']['delay'])
+
+    # airthings = ModuleAirthings(api_id=config['airthings']['api_id'], api_secret=config['airthings']['api_secret'],
+    #                             device_id=config['airthings']['device_id'])
+    # airthings.update_data()
+    # airthings.get_picture()
 
     # picture = module_photo.get_picture()
     # display_image_8bpp(display, picture)
